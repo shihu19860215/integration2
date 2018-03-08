@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shihu.mybatis.dao.CarDao">
+    <select id="listByCarTypeId" parameterType="long" resultType="com.shihu.model.common.VO.CarVO">
+        select * from car_ where cartypeid=#{carTypeId}
+    </select>
+    <select id="getOneIdByCarTypeId" resultType="long" parameterType="long">
+        select id from  car_ where cartypeid=#{id} limit 0,1
+    </select>
+    <select id="getOneIdByName" parameterType="string" resultType="long">
+        select id from car_ where name=#{name} limit 0,1
+    </select>
+    <select id="getOneProductId" parameterType="long" resultType="long">
+        select id from car_product_ where carid=#{carId} limit 0,1
+    </select>
+    <select id="get" parameterType="long" resultType="com.shihu.model.common.VO.CarVO">
+        select * from car_ where id=#{id}
+    </select>
+    <select id="listAll" resultType="com.shihu.model.common.VO.CarVO">
+        select * from car_
+    </select>
+
+
+    <delete id="delete" parameterType="long">
+        delete from car_ where id=#{id}
+    </delete>
+
+    <insert id="insert" parameterType="com.shihu.model.common.VO.CarVO">
+        insert into car_(name,cartypeid) values(#{name},${carTypeId})
+    </insert>
+</mapper>

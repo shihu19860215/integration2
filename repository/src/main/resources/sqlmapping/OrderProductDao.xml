@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shihu.mybatis.dao.OrderProductDao">
+    <select id="getOrderProductAndProductVOListByOrderId" parameterType="long" resultType="com.shihu.model.common.VO.OrderProductAndProductVO">
+        select op.num num,op.price price,op.sell sell,p.name name,concat(p.version,p.remark) version,p.carstr carStr from order_product_ as op join product_ as p on p.id=op.productid where orderId=#{id}
+    </select>
+
+    <insert id="insert" parameterType="com.shihu.model.common.VO.OrderProductVO">
+        insert into order_product_(orderid,productid,num,price,sell) values(#{orderId},#{productId},#{num},#{price},#{sell})
+    </insert>
+
+</mapper>

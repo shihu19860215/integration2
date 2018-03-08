@@ -1,0 +1,51 @@
+新建一个empty project
+#########创建一个统一jar包管理的最高父模块##################
+创建maven项目root，删除src目录
+修改pom.xml
+    1.打包方式<packaging>pom</packaging>
+    2.加入<properties>自定义变量
+    3.加入<dependencyManagement><dependencies>统一版本管理
+    4.加入<profiles>统一配置文件路径名,方便管理线上线下测试的配置文件
+#########创建一个统一模块管理的父模块##################
+在项目根节点创建maven项目integration2,将root设置为父节点，删除src目录
+修改pom.xml
+    1.打包方式<packaging>pom</packaging>
+#########创建各个子模块模块##################
+在integration2节点添加各个模块
+    1.创建server模块,maven的webapp项目,服务器启动模块
+    3.创建client模块,普通maven项目，module层
+    4.创建repository模块,普通maven项目,持久化层
+    2.创建biz模块,普通maven项目，业务层
+    5.创建webfront模块,普通maven项目,控制层
+导入各个模块之间的依赖关系:client-->repository-->biz-->webfront-->server
+pom文件加入依赖包
+#########server模块##################
+web.xml修改
+    1.加入:编码，静态文件，spring，springmvc shiro,Druid的配置
+    2.添加 spring-context.xml配置文件，spring-mvc.xml配置文件
+spring-context.xml修改
+    1.添加扫描注解配置，扫描非controller注解的所有类
+    2.import各个需要的配置文件(datasource，mybatis,redis,shiro)
+spring-mvc.xml修改
+    1.添加扫描注解配置，只扫描controller注解的所有类
+spring-shiro.xml修改
+    1.配置自定义realm验证登录策略
+    2.配置cacheManager，可以配置内存cache，ehcache，redis，Redis集群
+        @redis，Redis集群
+        1.自定义cacheManager,
+        2.自定义cache
+    3.配置sessionManager,sessionDao
+        1.自定义sessionDao,重写readSession方法，在request里取session,防止一次请求多次对cache的读取
+    4.修改authc默认使用的FormAuthenticationFilter,用继承该filter，重写需要的方法。
+    5.配置FilterChainDefinitionMapBuilder，创建各个权限规则
+datasource.xml:加入DruidDataSource
+spring-mybatis.xml:加入mybatis配置文件
+spring-redis.xml:配置单个redis或集群
+
+
+
+
+#########webfront模块##################
+#########biz模块##################
+#########repository模块##################
+#########client模块##################

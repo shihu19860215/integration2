@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shihu.mybatis.dao.OrderDao">
+    <select id="get" parameterType="long" resultType="com.shihu.model.common.VO.OrderVO">
+        select * from order_ where id=#{id}
+    </select>
+
+    <select id="list"  parameterType="com.shihu.base.Page" resultType="com.shihu.model.common.VO.OrderVO">
+        select * from order_ where 1=1
+        <if test="parm!=null">
+            <if test="parm.customerId!=null and ''!=parm.customerId">
+                and customerid=#{parm.customerId}
+            </if>
+            <if test="parm.productName!=null and ''!=parm.productName">
+                and productnames like concat('%',#{parm.productName},'%')
+            </if>
+            <if test="parm.retreat==1">
+                and retreat=true
+            </if>
+            <if test="parm.start!=null">
+                <![CDATA[ and createtime > #{parm.start} ]]>
+            </if>
+            <if test="parm.end!=null">
+                <![CDATA[  and createtime < #{parm.end} ]]>
+            </if>
+        </if>
+        order by createtime desc
+        limit #{startNum},#{pageSize}
+    </select>
+    <select id="count"  parameterType="com.shihu.base.Page" resultType="int">
+        select count(*) from order_ where 1=1
+        <if test="parm!=null">
+            <if test="parm.customerId!=null">
+                and customerid=#{parm.customerId}
+            </if>
+            <if test="parm.productName!=null and ''!=parm.productName">
+                and productnames like concat('%',#{parm.productName},'%')
+            </if>
+            <if test="parm.retreat==true">
+                and retreat=true
+            </if>
+            <if test="parm.start!=null">
+                <![CDATA[ and createtime > #{parm.start} ]]>
+            </if>
+            <if test="parm.end!=null">
+                <![CDATA[  and createtime < #{parm.end} ]]>
+            </if>
+        </if>
+    </select>
+
+
+    <insert id="insert" parameterType="com.shihu.model.common.VO.OrderVO" useGeneratedKeys="true" keyProperty="id">
+        insert into order_(customerid,customername,total,productnames,remarks,retreat,valid,createtime) values(#{customerId},#{customerName},#{total},#{productNames},#{remarks},#{retreat},true,now())
+    </insert>
+    <update id="update" parameterType="com.shihu.model.common.VO.OrderVO">
+        update order_ set remarks=#{remarks} where id=#{id}
+    </update>
+
+</mapper>

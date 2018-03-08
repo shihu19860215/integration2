@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shihu.mybatis.dao.ProductDao">
+    <select id="get" parameterType="long" resultType="com.shihu.model.common.VO.ProductVO">
+		select * from product_ where id=#{id}
+    </select>
+    <select id="listProductVOByCarId" resultType="com.shihu.model.common.VO.ProductVO" parameterType="long">
+		select * from product_ as p join car_product_ as cp on p.id=cp.productid where cp.carid=#{id} and display=TRUE
+    </select>
+    <select id="searchProduct" parameterType="java.util.Map" resultType="com.shihu.model.common.VO.ProductVO">
+        select p.* from product_ as p
+        join car_product_ as cp on p.id=cp.productid
+        join car_ as c on c.id=cp.carid where display=TRUE
+        <if test="carName!=null">
+            and c.name like #{carName}
+        </if>
+        <if test="productName!=null">
+            and p.name like #{productName}
+        </if>
+        <if test="version!=null">
+            and p.version like #{version}
+        </if>
+        <if test="remark!=null">
+            and p.remark like #{remark}
+        </if>
+        group by p.id
+        <if test="sort!= null" >
+            order by
+            <choose>
+                <when test="sort == 'cNameAsc'">
+                    convert(c.name using gbk) asc,convert(p.name using gbk) asc,convert(p.version using gbk) asc,p.num asc
+                </when>
+                <when test="sort == 'cNameDesc'">
+                    convert(c.name using gbk) desc,convert(p.name using gbk) asc,convert(p.version using gbk) asc,p.num asc
+                </when>
+                <when test="sort == 'pNameAsc'">
+                    convert(p.name using gbk) asc,convert(c.name using gbk) asc,convert(p.version using gbk) asc,p.num asc
+                </when>
+                <when test="sort == 'pNameDesc'">
+                    convert(p.name using gbk) desc,convert(c.name using gbk) asc,convert(p.version using gbk) asc,p.num asc
+                </when>
+                <when test="sort == 'pNumAsc'">
+                    p.num asc,convert(c.name using gbk) asc,convert(p.name using gbk) asc,convert(p.version using gbk) asc
+                </when>
+                <when test="sort == 'pNumDesc'">
+                    p.num desc,convert(c.name using gbk) asc,convert(p.name using gbk) asc,convert(p.version using gbk) asc
+                </when>
+                <when test="sort == 'pVersionAsc'">
+                    convert(p.version using gbk) asc,convert(c.name using gbk) asc,convert(p.name using gbk) asc,p.num asc
+                </when>
+                <when test="sort == 'pVersionDesc'">
+                    convert(p.version using gbk) desc,convert(c.name using gbk) asc,convert(p.name using gbk) asc,p.num asc
+                </when>
+            </choose>
+        </if>
+    </select>
+
+    <update id="update" parameterType="com.shihu.model.common.VO.ProductVO">
+        update product_ set num=#{num},ownerprice=#{ownerprice}
+        ,otherprice=#{otherprice},carStr=#{carStr} where id=#{id}
+    </update>
+    <update id="updateNum" parameterType="com.shihu.model.common.VO.ProductVO">
+        update product_ set num=#{num} where id=#{id}
+    </update>
+    <!--逻辑删除-->
+    <update id="delete" parameterType="long">
+        update product_ set display=FALSE where id=#{id}
+    </update>
+
+
+    <insert id="insert" parameterType="com.shihu.model.common.VO.ProductVO" keyProperty="id">
+        insert into product_(name,num,version,ownerprice,otherprice,remark,carstr,display)
+        values(#{name},#{num},#{version},#{ownerprice},#{otherprice},#{remark},#{carStr},TRUE )
+    </insert>
+
+</mapper>
