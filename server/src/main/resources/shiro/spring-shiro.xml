@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+				http://www.springframework.org/schema/aop
+				http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="cacheManager" ref="cacheManager"/>
+        <!-- Single realm app. If you have multiple realms, use the 'realms' property
+            instead.-->
+        <property name="realm" ref="userRealm"/>
+        <!--多个ream认证策略，单个通过就认证成功
+        <property name="authenticator" ref="authenticator"/>
+        <property name="realms">
+            <list>
+                <ref bean="userRealm"/>
+            </list>
+        </property>
+        -->
+        <property name="rememberMeManager" ref="rememberMeManager"/>
+        <property name="sessionManager" ref="sessionManager"/>
+    </bean>
+    <bean id="userRealm" class="com.shihu.shiro.realm.UserRealm">
+        <property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+                <property name="hashAlgorithmName" value="${user.shiro.hashAlgorithmName}"/>
+                <property name="hashIterations" value="${user.shiro.hashIterations}"/>
+            </bean>
+        </property>
+        <property name="authorizationCachingEnabled" value="false"></property>
+    </bean>
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager"/>
+    <bean id="authenticator" class="org.apache.shiro.authc.pam.ModularRealmAuthenticator"/>
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="sessionValidationInterval" value="${user.shiro.sessionValidationInterval}"></property>
+        <property name="globalSessionTimeout" value="${user.shiro.globalSessionTimeout}"></property>
+        <property name="deleteInvalidSessions" value="${user.shiro.deleteInvalidSessions}"></property>
+        <property name="sessionValidationSchedulerEnabled" value="${user.shiro.sessionValidationSchedulerEnabled}"></property>
+        <property name="sessionIdCookie.domain" value="${user.shiro.sessionIdCookie.domain}"></property>
+        <property name="sessionIdCookie.name" value="${user.shiro.sessionIdCookie.name}"></property>
+        <property name="sessionIdCookie.path" value="${user.shiro.sessionIdCookie.path}"></property>
+        <property name="sessionDAO" ref="sessionDao"></property>
+    </bean>
+    <!--
+        <bean id="sessionDao" class="org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO">
+            <property name="sessionIdGenerator" ref="sessionIdGenerator"></property>
+            <property name="activeSessionsCacheName" value="EnterpriseCacheSessionDAO"></property>
+        </bean>-->
+    <bean id="sessionDao" class="com.shihu.shiro.session.SessionRedisDaoImpl">
+        <property name="sessionIdGenerator" ref="sessionIdGenerator" />
+        <property name="activeSessionsCacheName" value="activeSessionsCache" />
+        <property name="cacheManager" ref="cacheManager"/>
+    </bean>
+    <bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"></bean>
+
+    <!--ehcache缓存配置
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:ehcache/ehcache.xml"/>
+    </bean>
+    -->
+    <!--内存缓存配置-->
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
+
+    <!--redis缓存配置
+    <bean id="cacheManager" class="com.shihu.shiro.cache.RedisCacheManager">
+        <property name="cache" ref="redisCache"/>
+    </bean>
+    <bean id="redisCache" class="com.shihu.shiro.cache.RedioCache">
+        <property name="keyPrefix" value="redis_shiro_cache"/>
+    </bean>-->
+
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+    <!-- Enable Shiro Annotations for Spring-configured beans. Only run after
+        the lifecycleBeanProcessor has run: -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+            depends-on="lifecycleBeanPostProcessor"/>
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="${user.shiro.loginUrl}"/>
+        <property name="successUrl" value="${user.shiro.successUrl}"/>
+        <property name="unauthorizedUrl" value="${user.shiro.unauthorizedUrl}"/>
+        <!--自定义从数据库读取url对应的权限-->
+        <property name="filterChainDefinitionMap" ref="filterChainDefinitionMap"></property>
+        <property name="filters">
+            <map>
+                <!--修改默认的认证规则-->
+                <entry key="authc">
+                    <bean class="com.shihu.shiro.filter.UserFormAuthenticationFilter"/>
+                </entry>
+                <!--修改默认的roles 规则，使用自定义filter,似的多个roles参数时，用户只要拥有一个roles就可以访问
+                <entry key="roles" >
+                    <bean class="com.shihu.shiro.filter.OneRolesAuthorizationFilter"/>
+                </entry>
+                -->
+            </map>
+        </property>
+        <!-- The 'filters' property is not necessary since any declared javax.servlet.Filter
+            bean defined will be automatically acquired and available via its beanName
+            in chain definitions, but you can perform overrides or parent/child consolidated
+            configuration here if you like: -->
+        <!-- <property name="filters"> <util:map> <entry key="aName" value-ref="someFilterPojo"/>
+            </util:map> </property>
+        <property name="filterChainDefinitions">
+            <value>
+                /resources/**=anon
+                /login = anon
+                /home = anon
+                /cartype/list = anon
+                /loginout = logout
+                /search/product = roles[ProductSearchController:toUpdatePage]
+                /** = authc
+            </value>
+        </property> -->
+    </bean>
+
+    <bean id="logout" class="org.apache.shiro.web.filter.authc.LogoutFilter">
+        <property name="redirectUrl" value="${user.shiro.redirectUrl}"/>
+    </bean>
+    <bean id="filterChainDefinitionMap" factory-bean="filterChainDefinitionMapBuilder" factory-method="build"></bean>
+    <bean id="filterChainDefinitionMapBuilder" class="com.shihu.shiro.factory.FilterChainDefinitionMapBuilder"></bean>
+
+
+</beans>

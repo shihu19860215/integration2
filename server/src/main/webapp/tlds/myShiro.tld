@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<taglib>
+
+  <tlib-version>1.0.0</tlib-version>
+  <jsp-version>1.2</jsp-version>
+  <short-name>Apache Shiro</short-name>
+  <description>Apache Shiro JSP Tag Library.</description>
+  <uri>http://java.sun.com/jsp/jstl/functionsc</uri>
+
+  <tag>
+    <name>principalName</name>
+    <tag-class>com.shihu.tag.myshiro.PrincipalName</tag-class>
+    <body-content>JSP</body-content>
+    <description>showusername</description>
+  </tag>
+
+</taglib>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<taglib>
+
+  <tlib-version>1.0.0</tlib-version>
+  <jsp-version>1.2</jsp-version>
+  <short-name>My Tag</short-name>
+  <description>My Tag Library.</description>
+  <uri>http://java.sun.com/jsp/jstl/functionsc</uri>
+
+  <tag>
+    <name>collectionForEach</name>
+    <tag-class>com.shihu.tag.mytag.CollectionForEach</tag-class>
+    <body-content>JSP</body-content>
+    <description>xunhuanxianshi</description>
+    <attribute>
+      <name>items</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>var</name>
+      <required>true</required>
+      <rtexprvalue>false</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <name>inc</name>
+      <required>false</required>
+      <rtexprvalue>false</rtexprvalue>
+      <type>java.lang.Integer</type>
+    </attribute>
+    <attribute>
+      <name>start</name>
+      <required>false</required>
+      <rtexprvalue>false</rtexprvalue>
+      <type>java.lang.Integer</type>
+    </attribute>
+  </tag>
+</taglib>
